@@ -5,5 +5,6 @@ export interface IUser {
     createdAt: string;
     updatedAt?: string;
     email:string
-    verificationStatus:boolean
+    verificationStatus:boolean,
+    role:string
   }

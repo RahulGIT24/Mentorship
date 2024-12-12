@@ -9,6 +9,7 @@ const initialUser: IUser = {
   email: "",
   verificationStatus: false,
   updatedAt: "",
+  role:""
 };
 
 const initialState = {

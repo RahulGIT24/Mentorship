@@ -13,6 +13,7 @@ export interface IUser extends Document {
   updatedAt?: Date;
   verificationToken?: string;
   verificationTokenExpiration?: Date;
+  role:string
 
   // Custom methods
   passwordCompare(password: string): Promise<boolean>;

@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import apiCall from "../lib/apiCall";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 
 const passwordSchema = z
   .string()
@@ -45,6 +46,7 @@ const formSchema = z.object({
   username: usernameSchema,
   email: z.string().email({ message: "Invalid Email Address" }),
   password: passwordSchema,
+  role:z.enum(["mentor","mentee"])
 });
 
 function RegistrationPage() {
@@ -56,6 +58,7 @@ function RegistrationPage() {
       name: "",
       username: "",
       password: "",
+      role:undefined
     },
   });
 
@@ -149,6 +152,27 @@ function RegistrationPage() {
               </FormItem>
             )}
           />
+          <FormField
+          control={form.control}
+          name="role"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Enter Your Role</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Your Role" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="mentor">Mentor</SelectItem>
+                  <SelectItem value="mentee">Mentee</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
           <Button type="submit" disabled={loading}>
             {loading ? "Signing Up" : "Sign Up"}
           </Button>

@@ -24,7 +24,6 @@ const VerifyAccount = () => {
 
   const verifyAccount = async() => {
     if(searchParams.get("token")){
-      console.log(searchParams.get("token"));
       const res = await apiCall({method:"PATCH",url:`auth/verify-account?token=${searchParams.get("token")}`});
       if (res.status === 200) {
         setIsVerified(true);

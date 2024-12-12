@@ -31,9 +31,9 @@ const generateAccessandRefreshToken = async (userId: string) => {
 
 export const registerUser = asyncHandler(async (req, res) => {
   try {
-    const { name, username, password, email } = req.body;
+    const { name, username, password, email,role } = req.body;
     if (
-      [name, email, username, password].some((field) => field.trim() === "")
+      [name, email, username, password,role].some((field) => field.trim() === "")
     ) {
       return res
         .status(400)
@@ -94,6 +94,7 @@ export const registerUser = asyncHandler(async (req, res) => {
       email,
       verificationToken,
       verificationTokenExpiration,
+      role
     });
 
     await user.save();
@@ -240,7 +241,8 @@ export const login = asyncHandler(async (req, res) => {
             name: existingUser.name,
             email: existingUser.email,
             createdAt:existingUser.createdAt,
-            verificationStatus:existingUser.verificationStatus
+            verificationStatus:existingUser.verificationStatus,
+            role:existingUser.role,
           },
           `Welcome Back`
         )

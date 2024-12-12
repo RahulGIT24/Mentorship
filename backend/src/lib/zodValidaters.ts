@@ -28,6 +28,7 @@ export const userSchema = z.object({
   username: usernameSchema,
   email: z.string().email({ message: "Invalid Email Address" }),
   password: passwordSchema,
+  role:z.enum(["mentor","mentee"])
 });
 
 export const loginSchema = z.object({

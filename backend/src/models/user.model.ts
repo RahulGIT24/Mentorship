@@ -13,6 +13,7 @@ const userSchema = new Schema<IUser & Document>({
     type: String,
     required: true,
   },
+  role: { type: String, enum: ['mentor', 'mentee'], required: true },
   name: {
     type: String,
     required: true,
@@ -40,7 +41,6 @@ const userSchema = new Schema<IUser & Document>({
 });
 
 userSchema.methods.passwordCompare = async function (password: string) {
-  console.log(this)
   const res = await bcrypt.compare(password, this.password);
   return res;
 };
