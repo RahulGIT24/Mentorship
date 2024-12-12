@@ -7,4 +7,7 @@ export interface IUser {
     email:string
     verificationStatus:boolean,
     role:string
+    skills:string[],
+    interest:string[],
+    bio: string
   }

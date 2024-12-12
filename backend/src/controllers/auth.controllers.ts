@@ -5,7 +5,7 @@ import User from "../models/user.model.js";
 import jwt, { Secret } from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { CookieOptions } from "express";
-import { DecodedToken } from "../lib/interfaces.js";
+import { DecodedToken, UpdateData } from "../lib/interfaces.js";
 
 const generateAccessandRefreshToken = async (userId: string) => {
   try {
@@ -31,9 +31,11 @@ const generateAccessandRefreshToken = async (userId: string) => {
 
 export const registerUser = asyncHandler(async (req, res) => {
   try {
-    const { name, username, password, email,role } = req.body;
+    const { name, username, password, email, role } = req.body;
     if (
-      [name, email, username, password,role].some((field) => field.trim() === "")
+      [name, email, username, password, role].some(
+        (field) => field.trim() === ""
+      )
     ) {
       return res
         .status(400)
@@ -94,7 +96,7 @@ export const registerUser = asyncHandler(async (req, res) => {
       email,
       verificationToken,
       verificationTokenExpiration,
-      role
+      role,
     });
 
     await user.save();
@@ -240,9 +242,12 @@ export const login = asyncHandler(async (req, res) => {
             _id: existingUser._id,
             name: existingUser.name,
             email: existingUser.email,
-            createdAt:existingUser.createdAt,
-            verificationStatus:existingUser.verificationStatus,
-            role:existingUser.role,
+            createdAt: existingUser.createdAt,
+            verificationStatus: existingUser.verificationStatus,
+            role: existingUser.role,
+            skills: existingUser.skills || [],
+            interest: existingUser.interest || [],
+            bio: existingUser.bio || "",
           },
           `Welcome Back`
         )
@@ -438,3 +443,60 @@ export const currentUser = asyncHandler(async (req, res) => {
       .json(new ApiResponse(500, null, "Internal Server Error"));
   }
 });
+
+export const deleteAccount = asyncHandler(async (req, res) => {
+  try {
+    const id = req.user._id;
+    const user = await User.findByIdAndDelete(id);
+    if (!user) {
+      throw new ApiResponse(404, null, "User Not Found");
+    }
+    return res
+      .status(200)
+      .json(new ApiResponse(200, null, "User Account Deleted"));
+  } catch (error) {
+    if (error instanceof ApiResponse) {
+      return res.status(error.statuscode).json(error);
+    }
+    // Fallback for unhandled errors
+    return res
+      .status(500)
+      .json(new ApiResponse(500, null, "Internal Server Error"));
+  }
+});
+
+export const updateAccount = asyncHandler(async(req,res)=>{
+  try {
+    const {role,skills,interest,bio } = req.body;
+    const id = req.user._id;
+    if(!id){
+      throw new ApiResponse(401, null, "User Not Found");
+    }
+    const data:UpdateData = {};
+    if(role){
+      data.role = role;
+    }
+    if(skills){
+      data.skills = [...new Set(skills)] as string[];
+    }
+    if(interest){
+      data.interest = [... new Set(interest)] as string[];
+    }
+    if(bio){
+      data.bio = bio;
+    } 
+    const user = await User.findByIdAndUpdate(id,data,{new:true});
+    if(!user){
+      throw new ApiResponse(404, null, "User Not Found");
+    }
+    return res.status(200).json(new ApiResponse(200, user, "User Details Updated"));
+  } catch (error) {
+    if (error instanceof ApiResponse) {
+      return res.status(error.statuscode).json(error);
+    }
+    // Fallback for unhandled errors
+    return res
+      .status(500)
+      .json(new ApiResponse(500, null, "Internal Server Error"));
+  }
+})  

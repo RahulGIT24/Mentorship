@@ -2,6 +2,7 @@ import mongoose, { Document, Schema } from "mongoose";
 import { IUser } from "../lib/interfaces";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { string } from "zod";
 
 const userSchema = new Schema<IUser & Document>({
   email: {
@@ -31,6 +32,9 @@ const userSchema = new Schema<IUser & Document>({
   },
   resetPasswordToken: String,
   resetPasswordTokenExpiration: Date,
+  skills:[String],
+  interest:[String],
+  bio:String,
   createdAt: {
     type: Date,
     default: Date.now,

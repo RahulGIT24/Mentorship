@@ -31,6 +31,13 @@ export const userSchema = z.object({
   role:z.enum(["mentor","mentee"])
 });
 
+export const userAccountUpdateSchema = z.object({
+  role:z.enum(["mentor","mentee"]),
+  skills:z.array(z.string()),
+  interest:z.array(z.string()),
+  bio: z.string().min(10,"Bio Should be minimum of 10 characters").max(150,"Bio Should be maximum of 150 characters"),
+}).partial()
+
 export const loginSchema = z.object({
   email: z.string().email({ message: "Invalid Email Address" }),
   password: passwordSchema,

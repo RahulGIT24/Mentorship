@@ -14,6 +14,9 @@ export interface IUser extends Document {
   verificationToken?: string;
   verificationTokenExpiration?: Date;
   role:string
+  skills:string[],
+  interest:string[],
+  bio:string
 
   // Custom methods
   passwordCompare(password: string): Promise<boolean>;
@@ -29,4 +32,11 @@ export interface IApiResponse<T = any> {
 
 export interface DecodedToken {
   _id: string;
+}
+
+export interface UpdateData{
+  role?: string,
+  skills?: string[],
+  interest?: string[],
+  bio?: string
 }

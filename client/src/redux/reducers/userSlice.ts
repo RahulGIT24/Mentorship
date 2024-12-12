@@ -9,7 +9,10 @@ const initialUser: IUser = {
   email: "",
   verificationStatus: false,
   updatedAt: "",
-  role:""
+  role:"",
+  skills:[],
+  interest:[],
+  bio: ""
 };
 
 const initialState = {
