@@ -11,15 +11,17 @@ import ResetPassword from "./pages/ResetPassword";
 import VerifyAccount from "./pages/VerifyAccount";
 import { useDispatch, useSelector } from "react-redux";
 import { getUser } from "./lib/getUser";
-import { setAuth } from "./redux/reducers/userSlice";
+import { setAuth, setUser } from "./redux/reducers/userSlice";
 import { useEffect } from "react";
-import { Home } from "lucide-react";
+import Home from "./pages/Home";
+import Profile from "./pages/Profile";
 
 const App = () => {
   const authenticated = useSelector((state: any) => state.user.isAuthenticated);
   const dispatch = useDispatch();
   async function checkAuth() {
     const res = await getUser();
+    dispatch(setUser(res.data))
     dispatch(setAuth(res.status === 200));
   }
   useEffect(() => {
@@ -54,6 +56,10 @@ const App = () => {
           <Route
             path="/verify-account"
             element={authenticated ? <Navigate to={"/"} /> : <VerifyAccount />}
+          />
+          <Route
+            path="/profile"
+            element={authenticated ? <Profile /> : <Navigate to={"/login"} />}
           />
         </Routes>
       </Router>
