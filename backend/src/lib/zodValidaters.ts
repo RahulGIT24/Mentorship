@@ -36,7 +36,9 @@ export const userAccountUpdateSchema = z.object({
   skills:z.array(z.string()),
   interest:z.array(z.string()),
   bio: z.string().min(10,"Bio Should be minimum of 10 characters").max(150,"Bio Should be maximum of 150 characters"),
+  // page:z.number().min(1,"Page should be minimum 1")
 }).partial()
+
 
 export const loginSchema = z.object({
   email: z.string().email({ message: "Invalid Email Address" }),

@@ -24,6 +24,16 @@ const Navbar = () => {
             >
               Home
             </li>
+            <li
+              onClick={() => {
+                navigate("/discover");
+              }}
+              className={`cursor-pointer ${
+                location.href.split("/")[location.href.split("/").length-1] === "discover" && "text-purple-400"
+              }`}
+            >
+              Discover
+            </li>
           </ul>
         </div>
         <div>

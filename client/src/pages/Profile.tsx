@@ -8,20 +8,37 @@ import { UpdateDialog } from "../components/UpdateDialog";
 import { ShareProfile } from "../components/ShareDialogBox";
 import { useEffect, useState } from "react";
 import { DeleteDialog } from "../components/DeleteDialog";
+import apiCall from "../lib/apiCall";
 
 const Profile = () => {
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
-  const [data,setData] = useState<any>(null);
+  const [data, setData] = useState<any>(null);
   const loggedIndata = useSelector((state: any) => state.user.user);
-  const isAuthenticated = useSelector((state: any) => state.isAuthenticated);
+  const isAuthenticated = useSelector(
+    (state: any) => state.user.isAuthenticated
+  );
+
+  const fetchUserById = async (userId: string) => {
+    const res = await apiCall({
+      method: "GET",
+      url: `users/get-user?id=${userId}`,
+    });
+    setData(res.data);
+  };
+
   const navigate = useNavigate();
   useEffect(() => {
+    if (id) {
+      fetchUserById(id);
+    }
     if (!id && isAuthenticated === false) {
       navigate("/login");
     }
-    setData(loggedIndata)
-  },[loggedIndata]);
+    if (isAuthenticated === true) {
+      setData(loggedIndata);
+    }
+  }, [loggedIndata, id, isAuthenticated]);
   return (
     <>
       <Navbar />
@@ -29,7 +46,7 @@ const Profile = () => {
         {data ? (
           <div className="flex justify-center items-center w-full h-full flex-col">
             <div className="flex items-center space-x-16 h-[35vh]">
-              <img src={profilePic} alt="" className="rounded-full" />
+              <img src={data?.profileImage ?? profilePic} alt="" className="rounded-full h-56" />
               <div className="space-y-6">
                 <h1 className=" font-semibold text-7xl">
                   {data.name}
@@ -51,11 +68,11 @@ const Profile = () => {
                   <div className="space-x-4">
                     <UpdateDialog />
                     <ShareProfile
-                      plink={`${import.meta.env.VITE_FRONTEND_URl}/profile?id=${
+                      plink={`${import.meta.env.VITE_FRONTEND_URl}profile?id=${
                         data._id
                       }`}
                     />
-                    <DeleteDialog/>
+                    <DeleteDialog />
                   </div>
                 )}
               </div>

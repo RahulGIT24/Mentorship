@@ -9,5 +9,12 @@ export interface IUser {
     role:string
     skills:string[],
     interest:string[],
-    bio: string
+    bio: string,
+    profileImage?:string
   }
+export interface IFilter{
+  skills?:string[],
+  interest?:string[],
+  role?:string,
+  search?:string
+}

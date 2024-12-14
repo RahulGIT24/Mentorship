@@ -30,6 +30,11 @@ const userSchema = new Schema<IUser & Document>({
     required: true,
     default: false,
   },
+  profileImage:{
+    type:String,
+    required:true,
+    default:"https://i.pinimg.com/564x/b5/12/68/b5126803cf115b044849b64ca565a4a7.jpg"
+  },
   resetPasswordToken: String,
   resetPasswordTokenExpiration: Date,
   skills:[String],

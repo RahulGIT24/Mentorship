@@ -465,31 +465,33 @@ export const deleteAccount = asyncHandler(async (req, res) => {
   }
 });
 
-export const updateAccount = asyncHandler(async(req,res)=>{
+export const updateAccount = asyncHandler(async (req, res) => {
   try {
-    const {role,skills,interest,bio } = req.body;
+    const { role, skills, interest, bio } = req.body;
     const id = req.user._id;
-    if(!id){
+    if (!id) {
       throw new ApiResponse(401, null, "User Not Found");
     }
-    const data:UpdateData = {};
-    if(role){
+    const data: UpdateData = {};
+    if (role) {
       data.role = role;
     }
-    if(skills){
+    if (skills) {
       data.skills = [...new Set(skills)] as string[];
     }
-    if(interest){
-      data.interest = [... new Set(interest)] as string[];
+    if (interest) {
+      data.interest = [...new Set(interest)] as string[];
     }
-    if(bio){
+    if (bio) {
       data.bio = bio;
-    } 
-    const user = await User.findByIdAndUpdate(id,data,{new:true});
-    if(!user){
+    }
+    const user = await User.findByIdAndUpdate(id, data, { new: true });
+    if (!user) {
       throw new ApiResponse(404, null, "User Not Found");
     }
-    return res.status(200).json(new ApiResponse(200, user, "User Details Updated"));
+    return res
+      .status(200)
+      .json(new ApiResponse(200, user, "User Details Updated"));
   } catch (error) {
     if (error instanceof ApiResponse) {
       return res.status(error.statuscode).json(error);
@@ -499,4 +501,6 @@ export const updateAccount = asyncHandler(async(req,res)=>{
       .status(500)
       .json(new ApiResponse(500, null, "Internal Server Error"));
   }
-})  
+});
+
+

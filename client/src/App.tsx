@@ -15,6 +15,7 @@ import { setAuth, setUser } from "./redux/reducers/userSlice";
 import { useEffect } from "react";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
+import Discover from "./pages/Discover";
 
 const App = () => {
   const authenticated = useSelector((state: any) => state.user.isAuthenticated);
@@ -58,8 +59,12 @@ const App = () => {
             element={authenticated ? <Navigate to={"/"} /> : <VerifyAccount />}
           />
           <Route
+            path="/discover"
+            element={!authenticated ? <Navigate to={"/"} /> : <Discover />}
+          />
+          <Route
             path="/profile"
-            element={authenticated ? <Profile /> : <Navigate to={"/login"} />}
+            element={<Profile />}
           />
         </Routes>
       </Router>

@@ -128,8 +128,9 @@ export function UpdateDialog() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Edit Bio</FormLabel>
+                  <br/>
                   <FormControl>
-                    <Input placeholder="Enter your bio" {...field} />
+                    <textarea className="bg-transparent border border-gray-300 w-full p-3" placeholder="Enter your bio" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

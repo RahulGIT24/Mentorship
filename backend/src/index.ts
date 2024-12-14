@@ -21,9 +21,11 @@ app.use(cookieParser());
 connectDB();
 // routes
 import authRouter from "./routes/auth.routes.js";
+import userRouter from "./routes/user.routes.js";
 import connectDB from "./lib/db.js";
 
 app.use("/api/auth", authRouter);
+app.use("/api/users", userRouter);
 
 app.listen(PORT, () => {
   console.log("Server Listening on PORT " + PORT);
