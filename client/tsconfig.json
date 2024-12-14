@@ -1,17 +1,17 @@
 {
-  "files": [],
-  "references": [
-    {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.node.json"
-    }
-  ],
   "compilerOptions": {
+    "module": "esnext",  // Set module to 'esnext' or 'es2020' for support of import.meta
+    "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
-    }
-  }
+      "@/*": ["./src/*"]  // Path alias for '@' to resolve to 'src' directory
+    },
+    "jsx": "react-jsx",
+    "allowImportingTsExtensions": true,  // Allow importing '.ts' and '.tsx' extensions
+    "allowJs": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }

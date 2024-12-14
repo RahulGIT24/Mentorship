@@ -10,7 +10,7 @@ function PaginatedPagination({ currentPage, totalPages, onPageChange }: { curren
                 {/* Previous Button */}
                 <PaginationItem>
                     <PaginationPrevious
-                        size={50}
+                        size="lg"
                         className={"p-3 text-xl"}
                         href="#"
                         onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
@@ -21,7 +21,7 @@ function PaginatedPagination({ currentPage, totalPages, onPageChange }: { curren
                 {pageNumbers.map((page) => (
                     <PaginationItem key={page}>
                         <PaginationLink
-                            size={50}
+                            size="lg"
                             href="#"
                             onClick={() => onPageChange(page)}
                             isActive={currentPage === page}
@@ -42,7 +42,7 @@ function PaginatedPagination({ currentPage, totalPages, onPageChange }: { curren
                 {/* Next Button */}
                 <PaginationItem>
                     <PaginationNext
-                        size={12}
+                        size="lg"
                         className={"p-3 text-xl"}
                         href="#"
                         onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}
