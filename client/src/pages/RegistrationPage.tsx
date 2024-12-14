@@ -17,6 +17,7 @@ import apiCall from "../lib/apiCall";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import Navbar from "@/components/Navbar";
 
 const passwordSchema = z
   .string()
@@ -81,6 +82,8 @@ function RegistrationPage() {
   const navigate = useNavigate();
 
   return (
+    <>
+    <Navbar/>
     <main className="w-full justify-center items-center flex h-screen flex-col">
       <p className="text-2xl my-6">
         Signup to <b className="text-purple-700">MentorSphere</b>
@@ -190,6 +193,7 @@ function RegistrationPage() {
         </span>
       </p>
     </main>
+    </>
   );
 }
 export default RegistrationPage;

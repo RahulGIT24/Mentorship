@@ -29,7 +29,7 @@ const apiCall = async ({
     if (error.response.status === 401) {
       const isRefreshed = await refresh();
       if(!isRefreshed){
-        await logout()
+        const res = await logout()
         return {data,status:error.response.status}
       }
     }

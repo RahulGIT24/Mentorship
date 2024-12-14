@@ -17,6 +17,7 @@ import toast from "react-hot-toast";
 import { useState } from "react";
 import { setAuth, setUser } from "../redux/reducers/userSlice";
 import { useDispatch } from "react-redux";
+import Navbar from "@/components/Navbar";
 
 const passwordSchema = z
   .string()
@@ -70,6 +71,8 @@ function LoginPage() {
     }
   }
   return (
+    <>
+      <Navbar/>
     <main className="w-full justify-center items-center flex h-screen flex-col">
       <p className="text-2xl my-6">
         Welcome to <b className="text-purple-700">MentorSphere</b>
@@ -133,6 +136,7 @@ function LoginPage() {
         </span>
       </p>
     </main>
+    </>
   );
 }
 export default LoginPage;

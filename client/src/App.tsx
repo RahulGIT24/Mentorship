@@ -16,6 +16,8 @@ import { useEffect } from "react";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import Discover from "./pages/Discover";
+import ForYou from "./pages/ForYou";
+import Notifications from "./pages/Notifications";
 
 const App = () => {
   const authenticated = useSelector((state: any) => state.user.isAuthenticated);
@@ -38,7 +40,7 @@ const App = () => {
           />
           <Route
             path="/"
-            element={authenticated ? <Home /> : <Navigate to={"/login"} />}
+            element={<Home />}
           />
           <Route
             path="/register"
@@ -60,11 +62,23 @@ const App = () => {
           />
           <Route
             path="/discover"
-            element={!authenticated ? <Navigate to={"/"} /> : <Discover />}
+            element={!authenticated ? <Navigate to={"/login"} /> : <Discover />}
+          />
+          <Route
+            path="/foryou"
+            element={!authenticated ? <Navigate to={"/login"} /> : <ForYou />}
+          />
+          <Route
+            path="/notifications"
+            element={!authenticated ? <Navigate to={"/login"} /> : <Notifications />}
           />
           <Route
             path="/profile"
             element={<Profile />}
+          />
+          <Route
+            path="*"
+            element={<Navigate to={"/"} />}
           />
         </Routes>
       </Router>
