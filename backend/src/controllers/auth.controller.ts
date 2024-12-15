@@ -47,6 +47,7 @@ export const registerUser = asyncHandler(async (req, res) => {
     // Check for existing user
     const existingUser = await User.findOne({
       $or: [{ username }, { email }],
+      verificationStatus:true
     }).select("name email username verificationStatus");
 
     if (existingUser && existingUser?.username === username) {

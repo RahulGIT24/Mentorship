@@ -11,7 +11,7 @@ export const getFilteredUsers = asyncHandler(async (req, res) => {
     const loggedInUserId = req.user._id; // Retrieve logged-in user's ID (from middleware or query)
     const pageSize = 10; // Number of users per page
 
-    const filter: any = { _id: { $ne: loggedInUserId } }; // Exclude logged-in user
+    const filter: any = { _id: { $ne: loggedInUserId },verificationStatus:true }; // Exclude logged-in user
 
     // Apply filters if provided
     if (role) filter.role = role;
@@ -36,7 +36,8 @@ export const getFilteredUsers = asyncHandler(async (req, res) => {
     const users = await User.find(filter)
       .select('username role skills interest bio name')
       .skip(name ? 0 : (page - 1) * pageSize) // Skip users for previous pages if not searching by name
-      .limit(name ? 0 : pageSize); // No limit if searching by name
+      .limit(name ? 0 : pageSize)
+      .sort({_id:-1}); // No limit if searching by name
 
     // Return users with pagination metadata (only if not searching by name)
     return res.status(200).json(new ApiResponse(200, {
@@ -64,7 +65,7 @@ export const getUserById = asyncHandler(async (req, res) => {
       throw new ApiResponse(400, null, "Invalid User ID");
     }
     const user = await User.findById(id).select("-password -refreshToken");
-    if (!user) {
+    if (!user || user.verificationStatus===false) {
       throw new ApiResponse(404, null, "User Not Found");
     }
     return res.status(200).json(new ApiResponse(200, user, "User Details"));
@@ -86,7 +87,7 @@ export const currentUser = asyncHandler(async (req, res) => {
       throw new ApiResponse(401, null, "User Not Found");
     }
     const user = await User.findById(id).select("-password -refreshToken");
-    if (!user) {
+    if (!user || user.verificationStatus===false) {
       throw new ApiResponse(404, null, "User Not Found");
     }
     const unreadNotifications = await Notification.countDocuments({

@@ -24,12 +24,14 @@ import authRouter from "./routes/auth.routes.js";
 import userRouter from "./routes/user.routes.js";
 import connectionRouter from "./routes/connection.routes.js";
 import notificationRouter from "./routes/notification.routes.js";
+import matchRouter from "./routes/match.routes.js";
 import connectDB from "./lib/db.js";
 
 app.use("/api/auth", authRouter);
 app.use("/api/users", userRouter);
 app.use("/api/connection", connectionRouter);
 app.use("/api/notifications", notificationRouter);
+app.use("/api/match", matchRouter);
 
 app.listen(PORT, () => {
   console.log("Server Listening on PORT " + PORT);
