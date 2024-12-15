@@ -31,6 +31,9 @@ const Profile = () => {
       method: "GET",
       url: `users/get-user?id=${userId}`,
     });
+    if(res.status>200){
+      navigate("/")
+    }
     await checkConnectionStatus();
     setData(res.data);
   };
@@ -154,6 +157,9 @@ const Profile = () => {
                 <p>
                   <i>{data.role.toUpperCase()}</i>
                 </p>
+                {
+                  !id && isAuthenticated===true && <Button variant="secondary">My Connections</Button>
+                }
                 {id && isAuthenticated === true ? (
                   <>
                     {

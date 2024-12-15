@@ -90,9 +90,9 @@ export const getConnections = asyncHandler(async (req, res) => {
             ],
             isAccepted: true
         }).populate({
-            path: "sender", select: "username name role skills interest bio _id"
+            path: "sender", select: "username name role profileImage _id"
         }).populate({
-            path: "receiver", select: "username name role skills interest bio _id"
+            path: "receiver", select: "username name role profileImage _id"
         })
         return res.status(200).json(new ApiResponse(200, currentUserConnections, "Fetched"))
     } catch (error) {
@@ -116,18 +116,18 @@ export const getPendingRequests = asyncHandler(async (req, res) => {
                 sender: user,
                 isPending: true
             }).populate({
-                path: "sender", select: "username name role skills interest bio _id"
+                path: "sender", select: "username name role profileImage _id"
             }).populate({
-                path: "receiver", select: "username name role skills interest bio _id"
+                path: "receiver", select: "username name role profileImage _id"
             })
         } else if (parameter === "receivedbyme") {
             currentUserPendingConnections = await Connection.find({
                 receiver: user,
                 isPending: true
             }).populate({
-                path: "sender", select: "username name role skills interest bio _id"
+                path: "sender", select: "username name role profileImage _id"
             }).populate({
-                path: "receiver", select: "username name role skills interest bio _id"
+                path: "receiver", select: "username name role profileImage _id"
             })
         } else {
             throw new ApiResponse(400, null, "Invalid Query")
