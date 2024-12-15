@@ -18,6 +18,7 @@ export interface IUser extends Document {
   interest:string[],
   bio:string,
   profileImage:string,
+  unreadNotifications?:number
 
   // Custom methods
   passwordCompare(password: string): Promise<boolean>;

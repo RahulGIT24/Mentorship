@@ -6,6 +6,7 @@ import jwt, { Secret } from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { CookieOptions } from "express";
 import { DecodedToken } from "../lib/interfaces.js";
+import Notification from "../models/notification.model.js";
 // import Connection from "../models/connection.model.js";
 
 const generateAccessandRefreshToken = async (userId: string) => {
@@ -231,6 +232,12 @@ export const login = asyncHandler(async (req, res) => {
     const { accessToken, refreshToken } = await generateAccessandRefreshToken(
       existingUser.id
     );
+
+    const unreadNotifications = await Notification.countDocuments({
+      receiver:existingUser.id,
+      isRead:false
+    })
+
     return res
       .status(200)
       .cookie("accessToken", accessToken, options)
@@ -249,6 +256,7 @@ export const login = asyncHandler(async (req, res) => {
             skills: existingUser.skills || [],
             interest: existingUser.interest || [],
             bio: existingUser.bio || "",
+            unreadNotifications
           },
           `Welcome Back`
         )

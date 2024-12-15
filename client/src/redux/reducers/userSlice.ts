@@ -12,7 +12,8 @@ const initialUser: IUser = {
   role:"",
   skills:[],
   interest:[],
-  bio: ""
+  bio: "",
+  unreadNotifications:0
 };
 
 const initialState = {
@@ -30,6 +31,10 @@ const userSlice = createSlice({
     setAuth: (state, action) => {
       state.isAuthenticated = action.payload;
     },
+    decrementUnreadNotifications:(state)=>{
+      if(state.user.unreadNotifications === 0) return;
+      state.user.unreadNotifications = state.user.unreadNotifications-1;
+    },
     revertInitial: (state) => {
       state.isAuthenticated = false;
       state.user = initialUser;
@@ -37,5 +42,5 @@ const userSlice = createSlice({
   },
 });
 
-export const {setUser,setAuth,revertInitial} = userSlice.actions
+export const {setUser,setAuth,revertInitial,decrementUnreadNotifications} = userSlice.actions
 export default userSlice.reducer

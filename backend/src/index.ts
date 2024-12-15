@@ -29,7 +29,7 @@ import connectDB from "./lib/db.js";
 app.use("/api/auth", authRouter);
 app.use("/api/users", userRouter);
 app.use("/api/connection", connectionRouter);
-app.use("/api/notification", notificationRouter);
+app.use("/api/notifications", notificationRouter);
 
 app.listen(PORT, () => {
   console.log("Server Listening on PORT " + PORT);

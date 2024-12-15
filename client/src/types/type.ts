@@ -11,10 +11,21 @@ export interface IUser {
     interest:string[],
     bio: string,
     profileImage?:string
+    unreadNotifications?:number
   }
 export interface IFilter{
   skills?:string[],
   interest?:string[],
   role?:string,
   search?:string
+}
+
+export interface INotification{
+  sender:string,
+  receiver:string,
+  subject:string,
+  description:string,
+  isRead:boolean
+  _id:string,
+  connectionRequest:boolean
 }

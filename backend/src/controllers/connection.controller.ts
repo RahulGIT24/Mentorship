@@ -24,7 +24,7 @@ export const sendReq = asyncHandler(async (req, res) => {
         }
         const username = req.user.username;
         await sendNotification({
-            senderId, receiverId, subject: "Connection Request", description: `@${username} wants to connect with you.`
+            senderId, receiverId, subject: "Somebody sent you connection request", description: `@${username} wants to connect with you.`
         })
         const connection = await Connection.create({
             sender: senderId, receiver: receiverId

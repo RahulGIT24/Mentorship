@@ -5,14 +5,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../components/ui/tooltip";
-import { LogInIcon, LogOutIcon, UserRound } from "lucide-react";
+import { BellIcon, LogInIcon, LogOutIcon, UserRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { revertInitial } from "@/redux/reducers/userSlice";
+import { Badge } from "./ui/badge";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const isAuthenticated = useSelector((state: any) => state.user.isAuthenticated)
+  const data = useSelector((state: any) => state.user.user)
   const dispatch = useDispatch();
   return (
     <nav className="w-full border-b border-gray-700 bg-zinc-900">
@@ -31,7 +33,7 @@ const Navbar = () => {
               onClick={() => {
                 navigate("/");
               }}
-              className={`cursor-pointer ${location.href.endsWith("/") && "text-purple-400"
+              className={`cursor-pointer hover:text-purple-700 ${location.href.endsWith("/") && "text-purple-400"
                 }`}
             >
               Home
@@ -42,7 +44,7 @@ const Navbar = () => {
                   onClick={() => {
                     navigate("/discover");
                   }}
-                  className={`cursor-pointer ${location.href.split("/")[location.href.split("/").length - 1] === "discover" && "text-purple-400"
+                  className={`cursor-pointer hover:text-purple-700 ${location.href.split("/")[location.href.split("/").length - 1] === "discover" && "text-purple-400"
                     }`}
                 >
                   Discover
@@ -51,12 +53,12 @@ const Navbar = () => {
                   onClick={() => {
                     navigate("/foryou");
                   }}
-                  className={`cursor-pointer ${location.href.split("/")[location.href.split("/").length - 1] === "foryou" && "text-purple-400"
+                  className={`cursor-pointer hover:text-purple-700 ${location.href.split("/")[location.href.split("/").length - 1] === "foryou" && "text-purple-400"
                     }`}
                 >
                   For You
                 </li>
-                <li
+                {/* <li
                   onClick={() => {
                     navigate("/notifications");
                   }}
@@ -64,31 +66,48 @@ const Navbar = () => {
                     }`}
                 >
                   Notifications
-                </li>
+                </li> */}
               </>
             }
           </ul>
         </div>
-        <div className="space-x-4">
+        <div className="space-x-8">
           {
             isAuthenticated &&
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <UserRound className="cursor-pointer" size={"2rem"} onClick={() => { navigate("/profile") }} />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>User Profile</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <UserRound className="cursor-pointer hover:text-purple-700" size={"2rem"} onClick={() => { navigate("/profile") }} />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>User Profile</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <BellIcon className="cursor-pointer hover:text-purple-700" size={"2rem"} onClick={() => { navigate("/notifications") }} />
+                    {data.unreadNotifications>0 &&
+                      <Badge className="absolute top-[12px]" variant="destructive">
+                        {data.unreadNotifications}
+                      </Badge>
+                    }
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Notifications</p>
+                  </TooltipContent> 
+                </Tooltip>
+              </TooltipProvider>
+            </>
           }
           {
             isAuthenticated ?
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <LogOutIcon className="cursor-pointer" size={"2rem"} onClick={() => {
+                    <LogOutIcon className="cursor-pointer hover:text-purple-700" size={"2rem"} onClick={() => {
                       if (logout()) {
                         dispatch(revertInitial());
                       }
@@ -103,7 +122,7 @@ const Navbar = () => {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <LogInIcon className="cursor-pointer" size={"2rem"} onClick={() => { navigate("/login") }} />
+                    <LogInIcon className="cursor-pointer hover:text-purple-700" size={"2rem"} onClick={() => { navigate("/login") }} />
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Log In</p>

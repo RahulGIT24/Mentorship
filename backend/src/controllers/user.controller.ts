@@ -93,7 +93,10 @@ export const currentUser = asyncHandler(async (req, res) => {
       receiver:id,
       isRead:false
     })
-    return res.status(200).json(new ApiResponse(200, {user,unreadNotifications}, "User Details"));
+    const userObject = user.toObject();
+    userObject.unreadNotifications = unreadNotifications;
+
+    return res.status(200).json(new ApiResponse(200, userObject, "User Details"));
   } catch (error) {
     if (error instanceof ApiResponse) {
       return res.status(error.statuscode).json(error);
