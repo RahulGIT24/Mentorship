@@ -1,5 +1,8 @@
 import { ApiResponse } from "../lib/apiResponse.js";
 import { asyncHandler } from "../lib/asyncHandler.js";
+import { UpdateData } from "../lib/interfaces.js";
+import Connection from "../models/connection.model.js";
+import Notification from "../models/notification.model.js";
 import User from "../models/user.model.js";
 
 export const getFilteredUsers = asyncHandler(async (req, res) => {
@@ -25,7 +28,7 @@ export const getFilteredUsers = asyncHandler(async (req, res) => {
     }
 
     // Count total matching users for pagination metadata (only if not searching by name)
-    const totalUsers = name 
+    const totalUsers = name
       ? await User.countDocuments(filter)  // If name is provided, count without pagination
       : await User.countDocuments({ ...filter, name: { $exists: true } });
 
@@ -65,6 +68,91 @@ export const getUserById = asyncHandler(async (req, res) => {
       throw new ApiResponse(404, null, "User Not Found");
     }
     return res.status(200).json(new ApiResponse(200, user, "User Details"));
+  } catch (error) {
+    if (error instanceof ApiResponse) {
+      return res.status(error.statuscode).json(error);
+    }
+    // Fallback for unhandled errors
+    return res
+      .status(500)
+      .json(new ApiResponse(500, null, "Internal Server Error"));
+  }
+});
+
+export const currentUser = asyncHandler(async (req, res) => {
+  try {
+    const id = req.user._id;
+    if (!id) {
+      throw new ApiResponse(401, null, "User Not Found");
+    }
+    const user = await User.findById(id).select("-password -refreshToken");
+    if (!user) {
+      throw new ApiResponse(404, null, "User Not Found");
+    }
+    const unreadNotifications = await Notification.countDocuments({
+      receiver:id,
+      isRead:false
+    })
+    return res.status(200).json(new ApiResponse(200, {user,unreadNotifications}, "User Details"));
+  } catch (error) {
+    if (error instanceof ApiResponse) {
+      return res.status(error.statuscode).json(error);
+    }
+    // Fallback for unhandled errors
+    return res
+      .status(500)
+      .json(new ApiResponse(500, null, "Internal Server Error"));
+  }
+});
+
+export const deleteAccount = asyncHandler(async (req, res) => {
+  try {
+    const id = req.user._id;
+    const user = await User.findByIdAndDelete(id);
+    if (!user) {
+      throw new ApiResponse(404, null, "User Not Found");
+    }
+    return res
+      .status(200)
+      .json(new ApiResponse(200, null, "User Account Deleted"));
+  } catch (error) {
+    if (error instanceof ApiResponse) {
+      return res.status(error.statuscode).json(error);
+    }
+    // Fallback for unhandled errors
+    return res
+      .status(500)
+      .json(new ApiResponse(500, null, "Internal Server Error"));
+  }
+});
+
+export const updateAccount = asyncHandler(async (req, res) => {
+  try {
+    const { role, skills, interest, bio } = req.body;
+    const id = req.user._id;
+    if (!id) {
+      throw new ApiResponse(401, null, "User Not Found");
+    }
+    const data: UpdateData = {};
+    if (role) {
+      data.role = role;
+    }
+    if (skills) {
+      data.skills = [...new Set(skills)] as string[];
+    }
+    if (interest) {
+      data.interest = [...new Set(interest)] as string[];
+    }
+    if (bio) {
+      data.bio = bio;
+    }
+    const user = await User.findByIdAndUpdate(id, data, { new: true });
+    if (!user) {
+      throw new ApiResponse(404, null, "User Not Found");
+    }
+    return res
+      .status(200)
+      .json(new ApiResponse(200, user, "User Details Updated"));
   } catch (error) {
     if (error instanceof ApiResponse) {
       return res.status(error.statuscode).json(error);

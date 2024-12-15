@@ -73,7 +73,7 @@ export function UpdateDialog() {
     setLoading(true);
     const res = await apiCall({
       method: "PUT",
-      url: "auth/update-account",
+      url: "users/update-account",
       reqData: { ...values, skills, interest: interests },
     });
     setLoading(false);

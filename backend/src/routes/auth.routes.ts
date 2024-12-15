@@ -1,22 +1,18 @@
 import { Router } from "express";
 import {
   changePassword,
-  currentUser,
-  deleteAccount,
   forgotPassword,
   login,
   logoutUser,
   refreshAllTokens,
   registerUser,
-  updateAccount,
   verifyAccount,
-} from "../controllers/auth.controllers.js";
+} from "../controllers/auth.controller.js";
 import { validate } from "../middlewares/validator.js";
 import {
   changePasswordSchema,
   forgotPasswordSchema,
   loginSchema,
-  userAccountUpdateSchema,
   userSchema,
 } from "../lib/zodValidaters.js";
 import { verifyJWT } from "../middlewares/auth.js";
@@ -33,14 +29,7 @@ router.patch(
 );
 router.patch("/logout", verifyJWT, logoutUser);
 router.patch("/refresh-access-token", verifyJWT, refreshAllTokens);
-router.get("/get-current-user", verifyJWT, currentUser);
-router.delete("/delete-account", verifyJWT, deleteAccount);
-router.put(
-  "/update-account",
-  verifyJWT,
-  validate(userAccountUpdateSchema),
-  updateAccount
-);
+
 
 
 export default router;

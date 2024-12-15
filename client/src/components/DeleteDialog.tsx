@@ -25,7 +25,7 @@ export function DeleteDialog() {
   const dispatch = useDispatch();
   const deleteAC = async () => {
     setLoading(true);
-    const res = await apiCall({ method: "DELETE", url: "auth/delete-account" });
+    const res = await apiCall({ method: "DELETE", url: "users/delete-account" });
     if (res.status === 200) {
       await logout();
       setOpen(false);

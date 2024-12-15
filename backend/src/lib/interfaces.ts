@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import mongoose, { Document } from "mongoose";
 
 export interface IUser extends Document {
   email: string;
@@ -40,4 +40,18 @@ export interface UpdateData{
   skills?: string[],
   interest?: string[],
   bio?: string
+}
+
+export interface INotification{
+  sender:mongoose.Types.ObjectId,
+  receiver:mongoose.Types.ObjectId,
+  subject:string,
+  description:string,
+  isRead:boolean
+}
+export interface IConnection{
+  sender:mongoose.Types.ObjectId,
+  receiver:mongoose.Types.ObjectId,
+  isAccepted:boolean,
+  isPending:boolean,
 }
