@@ -78,7 +78,7 @@ const Navbar = () => {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <UserRound className="cursor-pointer hover:text-purple-700" size={"2rem"} onClick={() => { navigate("/profile") }} />
+                    <UserRound className={`cursor-pointer hover:text-purple-700 ${location.href.endsWith("profile") && "text-purple-400"}`} size={"2rem"} onClick={() => { navigate("/profile") }} />
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>User Profile</p>
@@ -88,7 +88,7 @@ const Navbar = () => {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <BellIcon className="cursor-pointer hover:text-purple-700" size={"2rem"} onClick={() => { navigate("/notifications") }} />
+                    <BellIcon className={`cursor-pointer hover:text-purple-700 ${location.href.endsWith("notifications") && "text-purple-400"}`} size={"2rem"} onClick={() => { navigate("/notifications") }} />
                     {data.unreadNotifications>0 &&
                       <Badge className="absolute top-[12px]" variant="destructive">
                         {data.unreadNotifications}

@@ -4,17 +4,22 @@ import { extractKeywords } from "../lib/extractKeywords.js";
 import User from "../models/user.model.js";
 
 export const matchMeWith = asyncHandler(async (req, res) => {
-    const { preference } = req.body; // User's preference input
+    let { preference } = req.body; // User's preference input
     const { page = 1, limit = 10 } = req.query;
 
     if(preference && String(preference).length < 50){
-        throw new ApiResponse(400,null,"preference should contain atleast 50 characters");
+        throw new ApiResponse(400,null,"preference should contain at least 50 characters");
+    }
+
+    // Remove commas and convert to plain text
+    if (preference) {
+        preference = preference.replace(/,/g, ''); // Remove all commas
     }
 
     // Extract current user
     const user = await User.findById(req.user._id);
-    if(user?.verificationStatus===false){
-        throw new ApiResponse(401,null,"User not verified")
+    if(user?.verificationStatus === false){
+        throw new ApiResponse(401,null,"User not verified");
     }
     if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -28,39 +33,28 @@ export const matchMeWith = asyncHandler(async (req, res) => {
 
         if (preference) {
             // Extract keywords from user preference
-            const keywords = extractKeywords(preference);
-            const keywordRegexes = keywords.map((keyword:string) => new RegExp(keyword, "i"));
+            const keywords = extractKeywords(preference); // Assuming preference includes words like skills or interests
+            const keywordPattern = keywords.join("|"); // Combine the keywords into a pattern for matching
 
-            // Extract skills and interests from preference
-            const preferenceSkills = extractKeywords(preference); // Assuming preference includes skill-related words
-            const preferenceInterests = extractKeywords(preference); // Assuming preference includes interest-related words
-
-            // Prepare case-insensitive regex for skills and interests from preference
-            const preferenceSkillsRegexes = preferenceSkills.map((skill:string) => new RegExp(skill, "i"));
-            const preferenceInterestsRegexes = preferenceInterests.map((interest:string) => new RegExp(interest, "i"));
-
-            // Match only based on preference
+            // Match the whole word/phrase in the bio, removing case sensitivity
             query = {
                 _id: { $ne: req.user._id }, // Exclude the current user
                 $or: [
-                    { bio: { $regex: keywordRegexes.join("|"), $options: "i" } }, // Case-insensitive regex for bio
-                    { skills: { $elemMatch: { $in: preferenceSkillsRegexes } } }, // Match based on preference skills
-                    { interest: { $elemMatch: { $in: preferenceInterestsRegexes } } }, // Match based on preference interests
+                    { bio: { $regex: `\\b(${keywordPattern})\\b`, $options: "i" } }, // Match whole keywords in bio (case-insensitive)
+                    { skills: { $elemMatch: { $in: keywords } } }, // Match skills from keywords
+                    { interest: { $elemMatch: { $in: keywords } } }, // Match interests from keywords
                 ],
-                verificationStatus:true
+                verificationStatus: true
             };
         } else {
             // Match based on user's existing skills and interests
-            const userSkillsRegexes = userSkills.map((skill) => new RegExp(skill, "i"));
-            const userInterestsRegexes = userInterests.map((interest) => new RegExp(interest, "i"));
-
             query = {
                 _id: { $ne: req.user._id }, // Exclude the current user
                 $or: [
-                    { skills: { $elemMatch: { $in: userSkillsRegexes } } }, // Match based on user's skills
-                    { interest: { $elemMatch: { $in: userInterestsRegexes } } }, // Match based on user's interests
+                    { skills: { $elemMatch: { $in: userSkills } } }, // Match based on user's skills
+                    { interest: { $elemMatch: { $in: userInterests } } }, // Match based on user's interests
                 ],
-                verificationStatus:true
+                verificationStatus: true
             };
         }
 
@@ -87,7 +81,12 @@ export const matchMeWith = asyncHandler(async (req, res) => {
             )
         );
     } catch (error) {
-        console.error("Error finding users:", error);
-        res.status(500).json({ message: "Server error" });
+        if (error instanceof ApiResponse) {
+            return res.status(error.statuscode).json(error);
+        }
+        // Fallback for unhandled errors
+        return res
+            .status(500)
+            .json(new ApiResponse(500, null, "Internal Server Error"));
     }
 });

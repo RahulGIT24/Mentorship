@@ -68,6 +68,7 @@ const ForYou = () => {
       toast.error("Enter minimum 50 characters");
       return;
     }
+    setLoading(true);
     const res = await apiCall({
       method: "POST",
       withCredentials: true,
@@ -88,15 +89,17 @@ const ForYou = () => {
   }
 
   useEffect(() => {
-    initialSearch()
-  }, [])
+    if(preference===""){
+      initialSearch()
+    }
+  }, [preference])
   return (
     <>
       <Navbar />
       <div className="flex justify-start p-9 flex-col">
         <Textarea
           className="p-3 bg-transparent w-1/2"
-          placeholder="Search By Preference"
+          placeholder="Search By Preference (eg. I want users who play chess, make motivational content etc..) "
           value={preference}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
           setPreference(e.target.value); // Update search state

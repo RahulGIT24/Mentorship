@@ -116,6 +116,16 @@ export const deleteAccount = asyncHandler(async (req, res) => {
     if (!user) {
       throw new ApiResponse(404, null, "User Not Found");
     }
+    await Connection.deleteMany({
+      $or:[
+        {sender:id},{receiver:id}
+      ]
+    })
+    await Notification.deleteMany({
+      $or:[
+        {sender:id},{receiver:id}
+      ]
+    })
     return res
       .status(200)
       .json(new ApiResponse(200, null, "User Account Deleted"));
