@@ -9,6 +9,7 @@ import { ShareProfile } from "../components/ShareDialogBox";
 import { useEffect, useState } from "react";
 import { DeleteDialog } from "../components/DeleteDialog";
 import apiCall from "../lib/apiCall";
+import toast from "react-hot-toast";
 
 const Profile = () => {
   const [searchParams] = useSearchParams();
@@ -18,12 +19,19 @@ const Profile = () => {
   const isAuthenticated = useSelector(
     (state: any) => state.user.isAuthenticated
   );
+  const [isConnected, setIsConnected] = useState<boolean | null>(null);
+  const [isPending, setIsPending] = useState<boolean | null>(null);
+  const [sender,setSender] = useState(null);
+  const [receiver,setReceiver]=useState(null);
+  const [connectionId,setConnectionId] = useState(null);
+  const user = useSelector((state:any)=>state.user.user)
 
   const fetchUserById = async (userId: string) => {
     const res = await apiCall({
       method: "GET",
       url: `users/get-user?id=${userId}`,
     });
+    await checkConnectionStatus();
     setData(res.data);
   };
 
@@ -39,6 +47,94 @@ const Profile = () => {
       setData(loggedIndata);
     }
   }, [loggedIndata, id, isAuthenticated]);
+
+  const checkConnectionStatus = async () => {
+    if (isAuthenticated && id) {
+      const res = await apiCall({
+        url: `connection/check-connection?id=${id}`,
+        method: "GET",
+        withCredentials: true
+      })
+      if (res.status === 400) {
+        setIsConnected(false);
+        setIsPending(false);
+        return;
+      }
+      if (res.status === 200) {
+        setSender(res.data.sender)
+        setConnectionId(res.data.id)
+        setReceiver(res.data.receiver)
+        setIsConnected(res.data.accepted);
+        setIsPending(res.data.pending);
+        return;
+      }
+      toast.error(res.message)
+    }
+  }
+
+  const sendConnectionRequest = async () => {
+    if (isAuthenticated && id && isPending === false && isConnected === false) {
+      const res = await apiCall({
+        url: `connection/send-request?id=${id}`,
+        method: "POST",
+        withCredentials: true,
+        reqData: {
+          receiverId: id
+        }
+      })
+      if (res.status === 200) {
+        setIsPending(true);
+        setSender(user._id)
+        setReceiver(id);
+        toast.success(res.message)
+        return;
+      }
+      toast.error(res.message)
+    }
+  }
+  const deleteConnection = async () => {
+    if (isAuthenticated && id) {
+      if (isPending === false && isConnected === false) return;
+      const res = await apiCall({
+        url: `connection/delete-connection?id=${id}`,
+        method: "DELETE",
+        withCredentials: true,
+        reqData: {
+          receiverId: id
+        }
+      })
+      if (res.status === 200) {
+        setIsPending(false);
+        setSender(null);
+        setReceiver(null);
+        setIsConnected(false);
+        toast.success(res.message)
+        return;
+      }
+      toast.error(res.message)
+    }
+  }
+  const acceptRequest = async () => {
+    if (isAuthenticated && id) {
+      if (isPending === false && isConnected === false) return;
+      const res = await apiCall({
+        url: `connection/accept-request`,
+        method: "POST",
+        withCredentials: true,
+        reqData: {
+          connectionId: connectionId
+        }
+      })
+      if (res.status === 200) {
+        setIsPending(false);
+        setIsConnected(true);
+        toast.success(res.message)
+        return;
+      }
+      toast.error(res.message)
+    }
+  }
+
   return (
     <>
       <Navbar />
@@ -59,18 +155,36 @@ const Profile = () => {
                   <i>{data.role.toUpperCase()}</i>
                 </p>
                 {id && isAuthenticated === true ? (
-                  <Button className="bg-purple-700 text-white hover:bg-white hover:text-purple-700">
-                    {data.role === "mentor"
-                      ? "Ask For Mentorship"
-                      : "Inivite for Mentorship"}
-                  </Button>
+                  <>
+                    {
+                      sender===null && receiver===null &&  <>
+                        <Button className="bg-purple-700" onClick={() => { sendConnectionRequest() }}>Send Connection Request</Button>
+                      </>
+                    }
+                    {
+                      sender!==null && receiver!==null && receiver===user._id && isConnected===false && <>
+                        <Button className="bg-green-700" onClick={() => { acceptRequest() }}>Accept Connection Request</Button>
+                      </>
+                    }
+                    {
+                      isPending !== null && isConnected !== null && isPending === true && sender === user._id &&<>
+                        <p className="text-green-500">Request Sent</p>
+                        <Button variant={'destructive'} onClick={()=>{deleteConnection()}}>Cancel Request</Button>
+                      </>
+                    }
+                    {
+                      isPending !== null && isConnected !== null && isConnected === true && <>
+                        <p className="text-green-500">Already Connected</p>
+                        <Button variant={'destructive'} onClick={()=>{deleteConnection()}}>Remove Connection</Button>
+                      </>
+                    }
+                  </>
                 ) : (
                   <div className="space-x-4">
                     <UpdateDialog />
                     <ShareProfile
-                      plink={`${import.meta.env.VITE_FRONTEND_URl}profile?id=${
-                        data._id
-                      }`}
+                      plink={`${import.meta.env.VITE_FRONTEND_URl}profile?id=${data._id
+                        }`}
                     />
                     <DeleteDialog />
                   </div>

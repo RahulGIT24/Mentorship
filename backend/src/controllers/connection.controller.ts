@@ -145,6 +145,34 @@ export const getPendingRequests = asyncHandler(async (req, res) => {
     }
 })
 
+export const deleteConnection = asyncHandler(async(req,res)=>{
+    try {
+        const id = req.query.id
+        const deleteConnection = await Connection.findOneAndDelete({
+            $or:[
+                {sender:id,receiver:req.user._id},
+                {receiver:id,sender:req.user._id}
+            ]
+        })
+        if(!deleteConnection){
+            throw new ApiResponse(400,null,"Connection Not exist")
+        }
+        let message = "Request Cancelled"
+        if(deleteConnection.isAccepted===true){
+            message = "Connection Removed"
+        }
+        res.status(200).json(new ApiResponse(200,deleteConnection,message))
+    } catch (error) {
+        if (error instanceof ApiResponse) {
+            return res.status(error.statuscode).json(error);
+        }
+        // Fallback for unhandled errors
+        return res
+            .status(500)
+            .json(new ApiResponse(500, null, "Internal Server Error"));
+    }
+})
+
 export const checkConnected = asyncHandler(async (req, res) => {
     try {
         const id = req.query.id;
@@ -164,7 +192,7 @@ export const checkConnected = asyncHandler(async (req, res) => {
         if (!connected) {
             throw new ApiResponse(400, null, "Not connected")
         }
-        return res.status(200).json(new ApiResponse(200, { pending: connected.isPending, accepted: connected.isAccepted }, "Fetched"))
+        return res.status(200).json(new ApiResponse(200, { pending: connected.isPending, accepted: connected.isAccepted,sender:connected.sender,receiver:connected.receiver,id:connected._id }, "Fetched"))
     } catch (error) {
         if (error instanceof ApiResponse) {
             return res.status(error.statuscode).json(error);
