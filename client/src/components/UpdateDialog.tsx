@@ -74,6 +74,10 @@ export function UpdateDialog() {
 
   const dispatch = useDispatch();
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if(values.bio && (values.bio.length < 10 || values.bio.length>150)){
+      toast.error("Bio should be between 10 to 150 chracters");
+      return;
+    }
     setLoading(true);
     try {
       const res = await apiCall({

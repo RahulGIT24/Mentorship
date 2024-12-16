@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { DeleteDialog } from "../components/DeleteDialog";
 import apiCall from "../lib/apiCall";
 import toast from "react-hot-toast";
+import ConnectionDialog from "@/components/ConnectionDialog";
 
 const Profile = () => {
   const [searchParams] = useSearchParams();
@@ -21,17 +22,18 @@ const Profile = () => {
   );
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
   const [isPending, setIsPending] = useState<boolean | null>(null);
-  const [sender,setSender] = useState(null);
-  const [receiver,setReceiver]=useState(null);
-  const [connectionId,setConnectionId] = useState(null);
-  const user = useSelector((state:any)=>state.user.user)
+  const [sender, setSender] = useState(null);
+  const [receiver, setReceiver] = useState(null);
+  const [connectionId, setConnectionId] = useState(null);
+  const user = useSelector((state: any) => state.user.user)
+  const [connections, setConnections] = useState([]);
 
   const fetchUserById = async (userId: string) => {
     const res = await apiCall({
       method: "GET",
       url: `users/get-user?id=${userId}`,
     });
-    if(res.status>200){
+    if (res.status > 200) {
       navigate("/")
     }
     await checkConnectionStatus();
@@ -47,6 +49,7 @@ const Profile = () => {
       navigate("/login");
     }
     if (isAuthenticated === true) {
+      fetchMyConnections();
       setData(loggedIndata);
     }
   }, [loggedIndata, id, isAuthenticated]);
@@ -138,6 +141,16 @@ const Profile = () => {
     }
   }
 
+  // co//nst fet
+  const fetchMyConnections = async () => {
+    const res = await apiCall({ method: "GET", url: `connection/get-accepted-connections` });
+    if (res.status === 200) {
+      setConnections(res.data);
+      return;
+    }
+    toast.error(res.message);
+  }
+
   return (
     <>
       <Navbar />
@@ -158,34 +171,35 @@ const Profile = () => {
                   <i>{data.role.toUpperCase()}</i>
                 </p>
                 {
-                  !id && isAuthenticated===true && <Button variant="secondary">My Connections</Button>
+                  !id && isAuthenticated === true && <ConnectionDialog connections={connections} />
                 }
                 {id && isAuthenticated === true ? (
                   <>
                     {
-                      sender===null && receiver===null &&  <>
+                      sender === null && receiver === null && <>
                         <Button className="bg-purple-700" onClick={() => { sendConnectionRequest() }}>Send Connection Request</Button>
                       </>
                     }
                     {
-                      sender!==null && receiver!==null && receiver===user._id && isConnected===false && <>
+                      sender !== null && receiver !== null && receiver === user._id && isConnected === false && <>
                         <Button className="bg-green-700" onClick={() => { acceptRequest() }}>Accept Connection Request</Button>
                       </>
                     }
                     {
-                      isPending !== null && isConnected !== null && isPending === true && sender === user._id &&<>
+                      isPending !== null && isConnected !== null && isPending === true && sender === user._id && <>
                         <p className="text-green-500">Request Sent</p>
-                        <Button variant={'destructive'} onClick={()=>{deleteConnection()}}>Cancel Request</Button>
+                        <Button variant={'destructive'} onClick={() => { deleteConnection() }}>Cancel Request</Button>
                       </>
                     }
                     {
                       isPending !== null && isConnected !== null && isConnected === true && <>
                         <p className="text-green-500">Already Connected</p>
-                        <Button variant={'destructive'} onClick={()=>{deleteConnection()}}>Remove Connection</Button>
+                        <Button variant={'destructive'} onClick={() => { deleteConnection() }}>Remove Connection</Button>
                       </>
                     }
                   </>
                 ) : (
+                  isAuthenticated &&
                   <div className="space-x-4">
                     <UpdateDialog />
                     <ShareProfile
@@ -203,7 +217,7 @@ const Profile = () => {
                   {data.name + "'s" + " " + "Bio"}
                 </p>
                 <section className="w-full">
-                  <p className="text-xl">{data.bio ? data.bio: "Nothing to Show"}</p>
+                  <p className="text-xl">{data.bio ? data.bio : "Nothing to Show"}</p>
                 </section>
               </div>
               <div className="p-5 my-4 space-y-5 w-full border border-gray-700 rounded-md">

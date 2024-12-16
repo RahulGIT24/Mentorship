@@ -84,17 +84,40 @@ export const acceptReq = asyncHandler(async (req, res) => {
 export const getConnections = asyncHandler(async (req, res) => {
     try {
         const user = req.user._id;
+
+        // Fetch all connections where the user is either sender or receiver and the connection is accepted
         const currentUserConnections = await Connection.find({
             $or: [
-                { sender: user }, { receiver: user }
+                { sender: user },
+                { receiver: user }
             ],
             isAccepted: true
-        }).populate({
-            path: "sender", select: "username name role profileImage _id"
-        }).populate({
-            path: "receiver", select: "username name role profileImage _id"
         })
-        return res.status(200).json(new ApiResponse(200, currentUserConnections, "Fetched"))
+        .populate({
+            path: "sender",
+            select: "username name role profileImage _id"
+        })
+        .populate({
+            path: "receiver",
+            select: "username name role profileImage _id"
+        });
+
+        // Filter out the logged-in user's ID and keep only the other person's ID
+        const connections = currentUserConnections.map(connection => {
+            const otherPerson:any = connection.sender._id.toString() === user.toString()
+                ? connection.receiver
+                : connection.sender;
+
+            return {
+                id: otherPerson._id,
+                username: otherPerson.username,
+                name: otherPerson.name,
+                role: otherPerson.role,
+                profileImage: otherPerson.profileImage
+            };
+        });
+
+        return res.status(200).json(new ApiResponse(200, connections, "Fetched"));
     } catch (error) {
         if (error instanceof ApiResponse) {
             return res.status(error.statuscode).json(error);
@@ -104,7 +127,8 @@ export const getConnections = asyncHandler(async (req, res) => {
             .status(500)
             .json(new ApiResponse(500, null, "Internal Server Error"));
     }
-})
+});
+
 
 export const getPendingRequests = asyncHandler(async (req, res) => {
     try {
