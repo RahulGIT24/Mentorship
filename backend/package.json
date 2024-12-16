@@ -8,7 +8,7 @@
     "watch": "tsc -w",
     "prod": "node dist/index.js",
     "build": "tsc",
-    "dev": "nodemon dist/index.js"
+    "dev": "node dist/index.js"
   },
   "keywords": [],
   "author": "",
