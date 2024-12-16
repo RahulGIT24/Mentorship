@@ -11,6 +11,7 @@ import { DeleteDialog } from "../components/DeleteDialog";
 import apiCall from "../lib/apiCall";
 import toast from "react-hot-toast";
 import ConnectionDialog from "@/components/ConnectionDialog";
+import { Progress } from "@/components/ui/progress";
 
 const Profile = () => {
   const [searchParams] = useSearchParams();
@@ -27,16 +28,26 @@ const Profile = () => {
   const [connectionId, setConnectionId] = useState(null);
   const user = useSelector((state: any) => state.user.user)
   const [connections, setConnections] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [progress,setProgress] = useState(10);
+  const [disabled,setDisabled] = useState(false);
 
   const fetchUserById = async (userId: string) => {
+    setLoading(true);
+    setProgress(30);
     const res = await apiCall({
       method: "GET",
       url: `users/get-user?id=${userId}`,
     });
+    setProgress(75)
     if (res.status > 200) {
+      setProgress(100)
+      setLoading(false);
       navigate("/")
     }
     await checkConnectionStatus();
+    setProgress(100)
+    setLoading(false);
     setData(res.data);
   };
 
@@ -80,6 +91,7 @@ const Profile = () => {
 
   const sendConnectionRequest = async () => {
     if (isAuthenticated && id && isPending === false && isConnected === false) {
+      setDisabled(true);
       const res = await apiCall({
         url: `connection/send-request?id=${id}`,
         method: "POST",
@@ -88,6 +100,7 @@ const Profile = () => {
           receiverId: id
         }
       })
+      setDisabled(false);
       if (res.status === 200) {
         setIsPending(true);
         setSender(user._id)
@@ -100,6 +113,7 @@ const Profile = () => {
   }
   const deleteConnection = async () => {
     if (isAuthenticated && id) {
+      setDisabled(true);
       if (isPending === false && isConnected === false) return;
       const res = await apiCall({
         url: `connection/delete-connection?id=${id}`,
@@ -109,6 +123,7 @@ const Profile = () => {
           receiverId: id
         }
       })
+      setDisabled(false);
       if (res.status === 200) {
         setIsPending(false);
         setSender(null);
@@ -150,126 +165,130 @@ const Profile = () => {
     }
     toast.error(res.message);
   }
-
   return (
     <>
       <Navbar />
-      <main>
-        {data ? (
-          <div className="flex justify-center items-center w-full h-full flex-col">
-            <div className="flex items-center space-x-16 h-[35vh]">
-              <img src={data?.profileImage ?? profilePic} alt="" className="rounded-full h-56" />
-              <div className="space-y-6">
-                <h1 className=" font-semibold text-7xl">
-                  {data.name}
-                  <br />
-                  <p className="text-base text-purple-400">
-                    {"@" + data.username}
-                  </p>
-                </h1>
-                <p>
-                  <i>{data.role.toUpperCase()}</i>
-                </p>
-                {
-                  !id && isAuthenticated === true && <ConnectionDialog connections={connections} />
-                }
-                {id && isAuthenticated === true ? (
-                  <>
+      {
+        loading===true ? <div className="flex justify-center items-center">
+          <Progress value={progress}/>
+          </div> :
+          <main>
+            {data ? (
+              <div className="flex justify-center items-center w-full h-full flex-col">
+                <div className="flex items-center space-x-16 h-[35vh]">
+                  <img src={data?.profileImage ?? profilePic} alt="" className="rounded-full h-56" />
+                  <div className="space-y-6">
+                    <h1 className=" font-semibold text-7xl">
+                      {data.name}
+                      <br />
+                      <p className="text-base text-purple-400">
+                        {"@" + data.username}
+                      </p>
+                    </h1>
+                    <p>
+                      <i>{data.role.toUpperCase()}</i>
+                    </p>
                     {
-                      sender === null && receiver === null && <>
-                        <Button className="bg-purple-700" onClick={() => { sendConnectionRequest() }}>Send Connection Request</Button>
-                      </>
+                      !id && isAuthenticated === true && <ConnectionDialog connections={connections} />
                     }
-                    {
-                      sender !== null && receiver !== null && receiver === user._id && isConnected === false && <>
-                        <Button className="bg-green-700" onClick={() => { acceptRequest() }}>Accept Connection Request</Button>
+                    {id && isAuthenticated === true ? (
+                      <>
+                        {
+                          sender === null && receiver === null && <>
+                            <Button className="bg-purple-700" disabled={disabled} onClick={() => { sendConnectionRequest() }}>Send Connection Request</Button>
+                          </>
+                        }
+                        {
+                          sender !== null && receiver !== null && receiver === user._id && isConnected === false && <>
+                            <Button className="bg-green-700" onClick={() => { acceptRequest() }}>Accept Connection Request</Button>
+                          </>
+                        }
+                        {
+                          isPending !== null && isConnected !== null && isPending === true && sender === user._id && <>
+                            <p className="text-green-500">Request Sent</p>
+                            <Button variant={'destructive'} onClick={() => { deleteConnection() }}>Cancel Request</Button>
+                          </>
+                        }
+                        {
+                          isPending !== null && isConnected !== null && isConnected === true && <>
+                            <p className="text-green-500">Already Connected</p>
+                            <Button variant={'destructive'} disabled={disabled} onClick={() => { deleteConnection() }}>Remove Connection</Button>
+                          </>
+                        }
                       </>
-                    }
-                    {
-                      isPending !== null && isConnected !== null && isPending === true && sender === user._id && <>
-                        <p className="text-green-500">Request Sent</p>
-                        <Button variant={'destructive'} onClick={() => { deleteConnection() }}>Cancel Request</Button>
-                      </>
-                    }
-                    {
-                      isPending !== null && isConnected !== null && isConnected === true && <>
-                        <p className="text-green-500">Already Connected</p>
-                        <Button variant={'destructive'} onClick={() => { deleteConnection() }}>Remove Connection</Button>
-                      </>
-                    }
-                  </>
-                ) : (
-                  isAuthenticated &&
-                  <div className="space-x-4">
-                    <UpdateDialog />
-                    <ShareProfile
-                      plink={`${import.meta.env.VITE_FRONTEND_URl}profile?id=${data._id
-                        }`}
-                    />
-                    <DeleteDialog />
+                    ) : (
+                      isAuthenticated &&
+                      <div className="space-x-4">
+                        <UpdateDialog />
+                        <ShareProfile
+                          plink={`${import.meta.env.VITE_FRONTEND_URl}profile?id=${data._id
+                            }`}
+                        />
+                        <DeleteDialog />
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </div>
-            <section className="flex justify-start items-start w-full px-36 flex-col max-h-screen">
-              <div className="p-5 my-4 space-y-5 w-full border border-gray-700 rounded-md">
-                <p className="font-semibold text-5xl">
-                  {data.name + "'s" + " " + "Bio"}
-                </p>
-                <section className="w-full">
-                  <p className="text-xl">{data.bio ? data.bio : "Nothing to Show"}</p>
+                </div>
+                <section className="flex justify-start items-start w-full px-36 flex-col max-h-screen">
+                  <div className="p-5 my-4 space-y-5 w-full border border-gray-700 rounded-md">
+                    <p className="font-semibold text-5xl">
+                      {data.name + "'s" + " " + "Bio"}
+                    </p>
+                    <section className="w-full">
+                      <p className="text-xl">{data.bio ? data.bio : "Nothing to Show"}</p>
+                    </section>
+                  </div>
+                  <div className="p-5 my-4 space-y-5 w-full border border-gray-700 rounded-md">
+                    <p className="font-semibold text-5xl">
+                      {data.name + "'s" + " " + "Skills"}
+                    </p>
+                    <section className="w-full flex space-x-5">
+                      {data.skills.length > 0 ? (
+                        data?.skills?.map((skill: string, index: number) => {
+                          return (
+                            <p
+                              className="bg-purple-700 text-white p-3 border rounded-lg px-14"
+                              key={index}
+                            >
+                              {skill}
+                            </p>
+                          );
+                        })
+                      ) : (
+                        <p>Nothing to show</p>
+                      )}
+                    </section>
+                  </div>
+                  <div className="p-5 my-4 space-y-5 w-full border border-gray-700 rounded-md">
+                    <p className="font-semibold text-5xl">
+                      {data.name + "'s" + " " + "Interests"}
+                    </p>
+                    <section className="w-full flex flex-wrap space-x-5">
+                      {data.interest.length > 0 ? (
+                        data?.interest?.map((interest: string, index: number) => {
+                          return (
+                            <p
+                              className="bg-purple-700 text-white p-3 border rounded-lg px-14"
+                              key={index}
+                            >
+                              {interest}
+                            </p>
+                          );
+                        })
+                      ) : (
+                        <p>Nothing to show</p>
+                      )}
+                    </section>
+                  </div>
                 </section>
               </div>
-              <div className="p-5 my-4 space-y-5 w-full border border-gray-700 rounded-md">
-                <p className="font-semibold text-5xl">
-                  {data.name + "'s" + " " + "Skills"}
-                </p>
-                <section className="w-full flex space-x-5">
-                  {data.skills.length > 0 ? (
-                    data?.skills?.map((skill: string, index: number) => {
-                      return (
-                        <p
-                          className="bg-purple-700 text-white p-3 border rounded-lg px-14"
-                          key={index}
-                        >
-                          {skill}
-                        </p>
-                      );
-                    })
-                  ) : (
-                    <p>Nothing to show</p>
-                  )}
-                </section>
+            ) : (
+              <div className="flex justify-center items-center h-[80vh] w-full">
+                <LoaderCircle className="animate-spin" size={"4rem"} />
               </div>
-              <div className="p-5 my-4 space-y-5 w-full border border-gray-700 rounded-md">
-                <p className="font-semibold text-5xl">
-                  {data.name + "'s" + " " + "Interests"}
-                </p>
-                <section className="w-full flex flex-wrap space-x-5">
-                  {data.interest.length > 0 ? (
-                    data?.interest?.map((interest: string, index: number) => {
-                      return (
-                        <p
-                          className="bg-purple-700 text-white p-3 border rounded-lg px-14"
-                          key={index}
-                        >
-                          {interest}
-                        </p>
-                      );
-                    })
-                  ) : (
-                    <p>Nothing to show</p>
-                  )}
-                </section>
-              </div>
-            </section>
-          </div>
-        ) : (
-          <div className="flex justify-center items-center h-[80vh] w-full">
-            <LoaderCircle className="animate-spin" size={"4rem"} />
-          </div>
-        )}
-      </main>
+            )}
+          </main>
+      }
     </>
   );
 };
