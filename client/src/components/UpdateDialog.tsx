@@ -27,35 +27,39 @@ import apiCall from "../lib/apiCall";
 import { setUser } from "../redux/reducers/userSlice";
 
 const formSchema = z.object({
-  bio: z.string().min(10, "Bio should be at least 10 characters"),
-  role: z.enum(["mentor", "mentee"]),
-  skills: z.string().array().min(1, "At least one skill is required"),
-  interest: z.string().array().min(1, "At least one interest is required"),
+  bio: z.string().optional(),
+  role: z.enum(["mentor", "mentee"]).optional(),
+  skills: z.array(z.string()).optional(),
+  interest: z.array(z.string()).optional(),
 });
 
 export function UpdateDialog() {
   const [loading, setLoading] = useState(false);
   const data = useSelector((state: any) => state.user.user);
-  const [skills, setSkills] = useState<string[]>(data.skills || []);
-  const [interests, setInterests] = useState<string[]>(data.interest || []);
+  const [skills, setSkills] = useState<string[]>(data?.skills || []);
+  const [interests, setInterests] = useState<string[]>(data?.interest || []);
   const [skillInput, setSkillInput] = useState("");
   const [interestInput, setInterestInput] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      bio: data.bio,
-      role: data.role,
-      skills,
-      interest: interests,
+      bio: data?.bio || "",
+      role: data?.role || "",
+      skills: data?.skills || [],
+      interest: data?.interest || [],
     },
   });
 
   const handleAddChip = (type: "skills" | "interest", value: string) => {
     if (value.trim()) {
-      if (type === "skills") setSkills((prev) => [...prev, value.trim()]);
-      if (type === "interest") setInterests((prev) => [...prev, value.trim()]);
+      if (type === "skills" && !skills.includes(value.trim())) {
+        setSkills((prev) => [...prev, value.trim()]);
+      }
+      if (type === "interest" && !interests.includes(value.trim())) {
+        setInterests((prev) => [...prev, value.trim()]);
+      }
     }
   };
 
@@ -71,34 +75,39 @@ export function UpdateDialog() {
   const dispatch = useDispatch();
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true);
-    const res = await apiCall({
-      method: "PUT",
-      url: "users/update-account",
-      reqData: { ...values, skills, interest: interests },
-    });
-    setLoading(false);
-    if (res.status > 201) {
-      toast.error(res.message, { duration: 3000 });
-    } else {
-      toast.success(res.message, { duration: 3000 });
-      dispatch(setUser(res.data));
-      setIsDialogOpen(false);
+    try {
+      const res = await apiCall({
+        method: "PUT",
+        url: "users/update-account",
+        reqData: { ...values, skills, interest: interests },
+      });
+      setLoading(false);
+
+      if (res.status > 201) {
+        toast.error(res.message || "Failed to update profile", { duration: 3000 });
+      } else {
+        toast.success(res.message || "Profile updated successfully", { duration: 3000 });
+        dispatch(setUser(res.data));
+        setIsDialogOpen(false);
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error("Error updating profile:", error);
+      toast.error("An error occurred while updating your profile.", { duration: 3000 });
     }
   }
 
   const handleDialogOpenChange = (isOpen: boolean) => {
     setIsDialogOpen(isOpen);
-
     if (isOpen) {
-      // Reset form and input states when dialog opens
       form.reset({
-        bio: data.bio,
-        role: data.role,
-        skills: data.skills || [],
-        interest: data.interest || [],
+        bio: data?.bio || "",
+        role: data?.role || "",
+        skills: data?.skills || [],
+        interest: data?.interest || [],
       });
-      setSkills(data.skills || []);
-      setInterests(data.interest || []);
+      setSkills(data?.skills || []);
+      setInterests(data?.interest || []);
       setSkillInput("");
       setInterestInput("");
     }
@@ -128,9 +137,12 @@ export function UpdateDialog() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Edit Bio</FormLabel>
-                  <br/>
                   <FormControl>
-                    <textarea className="bg-transparent border border-gray-300 w-full p-3" placeholder="Enter your bio" {...field} />
+                    <textarea
+                      className="bg-transparent border border-gray-300 w-full p-3"
+                      placeholder="Enter your bio"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -150,6 +162,7 @@ export function UpdateDialog() {
                       onChange={field.onChange}
                       className="w-full border border-gray-300 bg-transparent rounded-md p-2"
                     >
+                      <option value="" className="bg-black">Select Role</option>
                       <option value="mentor" className="bg-black">Mentor</option>
                       <option value="mentee" className="bg-black">Mentee</option>
                     </select>

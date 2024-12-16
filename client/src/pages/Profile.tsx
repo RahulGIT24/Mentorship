@@ -203,7 +203,7 @@ const Profile = () => {
                   {data.name + "'s" + " " + "Bio"}
                 </p>
                 <section className="w-full">
-                  <p className="text-xl">{data.bio ?? "Nothing to Show"}</p>
+                  <p className="text-xl">{data.bio ? data.bio: "Nothing to Show"}</p>
                 </section>
               </div>
               <div className="p-5 my-4 space-y-5 w-full border border-gray-700 rounded-md">
